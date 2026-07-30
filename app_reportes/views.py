@@ -2,9 +2,7 @@ import base64
 import os
 import subprocess
 import docx
-import pythoncom
 import openpyxl
-import win32com.client
 from multiprocessing import context
 from django.core.files.base import ContentFile
 from django.core.exceptions import ImproperlyConfigured
@@ -20,7 +18,6 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from app_reportes.models import InspeccionCabecera, ItemInspeccion, ItemInspeccionEvidencia, ObservacionConducta, ItemObservacionConducta, ReporteHSGI, ItemObsConductaEvidencia, ReporteHSGIEvidencia
 from datetime import date, datetime, timedelta
 from docxtpl import DocxTemplate, InlineImage
-from docx2pdf import convert
 from openpyxl.drawing.image import Image
 from openpyxl import Workbook
 from openpyxl.styles import Font
@@ -693,7 +690,6 @@ def guardar_firma_obsconducta_observado(request, token):
 
 
 def exportar_inspeccion_pdf(request, inspeccion_id):
-    pythoncom.CoInitialize()
     try:
         inspeccion = InspeccionCabecera.objects.get(id=inspeccion_id)
         fecha_raw = datetime.now().date().isoformat()  # Valor por defecto si no se proporciona
@@ -753,15 +749,21 @@ def exportar_inspeccion_pdf(request, inspeccion_id):
             docs, f"temp_i_pdf_{inspeccion.id}.pdf"
         )
         try:
-            convert(ruta_word_temp, ruta_pdf_generado)
+            subprocess.run([
+                'libreoffice', '--headless', '--convert-to', 'pdf',
+                ruta_word_temp, '--outdir', docs
+            ], check=True)
+            expected_output = os.path.join(docs, f"temp_inspeccion_{inspeccion.id}.pdf")
+            if os.path.exists(expected_output):
+                os.rename(expected_output, ruta_pdf_generado)
         except Exception as exc:
             if os.path.exists(ruta_word_temp):
                 os.remove(ruta_word_temp)
             raise RuntimeError(
-                'No se pudo convertir el documento Word a PDF. Verifique que Microsoft Word esté instalado y que la plantilla sea compatible.'
+                'No se pudo convertir el documento Word a PDF. Verifique que LibreOffice esté instalado y que la plantilla sea compatible.'
             ) from exc
     finally:
-            pythoncom.CoUninitialize()
+        pass
         # Limpieza de archivos temporales
     if os.path.exists(ruta_word_temp):
         os.remove(ruta_word_temp)
@@ -777,7 +779,6 @@ def exportar_inspeccion_pdf(request, inspeccion_id):
 
 
 def exportar_obsconducta_pdf(request, obsconducta_id):
-    pythoncom.CoInitialize()
     try:
         obsconducta = ObservacionConducta.objects.get(id=obsconducta_id)        
         fecha_raw = datetime.now().date().isoformat()  # Valor por defecto si no se proporciona
@@ -840,15 +841,21 @@ def exportar_obsconducta_pdf(request, obsconducta_id):
             docs, f"temp_odc_pdf_{obsconducta.id}.pdf"
         )
         try:
-            convert(ruta_word_temp, ruta_pdf_generado)
+            subprocess.run([
+                'libreoffice', '--headless', '--convert-to', 'pdf',
+                ruta_word_temp, '--outdir', docs
+            ], check=True)
+            expected_output = os.path.join(docs, f"temp_obsconducta_{obsconducta.id}.pdf")
+            if os.path.exists(expected_output):
+                os.rename(expected_output, ruta_pdf_generado)
         except Exception as exc:
             if os.path.exists(ruta_word_temp):
                 os.remove(ruta_word_temp)
             raise RuntimeError(
-                'No se pudo convertir el documento Word a PDF. Verifique que Microsoft Word esté instalado y que la plantilla sea compatible.'
+                'No se pudo convertir el documento Word a PDF. Verifique que LibreOffice esté instalado y que la plantilla sea compatible.'
             ) from exc
     finally:
-            pythoncom.CoUninitialize()
+        pass
         # Limpieza de archivos temporales
     if os.path.exists(ruta_word_temp):
         os.remove(ruta_word_temp)
@@ -865,7 +872,6 @@ def exportar_obsconducta_pdf(request, obsconducta_id):
         
 
 def exportar_reportehsgi_pdf(request, hsgi_id):
-    pythoncom.CoInitialize()
     try:
         hsgi = ReporteHSGI.objects.get(id=hsgi_id)
         fecha_raw = datetime.now().date().isoformat()  # Valor por defecto si no se proporciona
@@ -974,25 +980,13 @@ def exportar_reportehsgi_pdf(request, hsgi_id):
         ruta_pdf_generado = os.path.join(docs, f"temp_hsgi_{hsgi.id}.pdf")
         
         try:
-            excel_app = win32com.client.Dispatch("Excel.Application")
-            excel_app.Visible = False
-            excel_app.DisplayAlerts = False
-
-            # Abrir el archivo guardado en Excel
-            wb_com = excel_app.Workbooks.Open(ruta_temp_excel)
-            ws_com = wb_com.ActiveSheet
-
-            # Ajustes de página en la API COM de Excel
-            #ws_com.PageSetup.Zoom = False
-            #ws_com.PageSetup.FitToPagesWide = 1
-            #ws_com.PageSetup.FitToPagesTall = False
-
-            # Exportar a PDF (0 es el formato xlTypePDF)
-            ws_com.ExportAsFixedFormat(0, ruta_pdf_generado)
-
-            # Cerrar Excel
-            wb_com.Close(False)
-            excel_app.Quit()
+            subprocess.run([
+                'libreoffice', '--headless', '--convert-to', 'pdf',
+                ruta_temp_excel, '--outdir', docs
+            ], check=True)
+            expected_output = os.path.join(docs, f"temp_hsgi_{hsgi.id}.pdf")
+            if os.path.exists(expected_output):
+                os.rename(expected_output, ruta_pdf_generado)
         except Exception as exc:
             if os.path.exists(ruta_temp_excel):
                 os.remove(ruta_temp_excel)
@@ -1000,7 +994,7 @@ def exportar_reportehsgi_pdf(request, hsgi_id):
                 'No se pudo convertir el documento Excel a PDF. Verifique que LibreOffice esté instalado y que la plantilla sea compatible.'
             ) from exc
     finally:
-            pythoncom.CoUninitialize()
+        pass
         # Limpieza de archivos temporales
     if os.path.exists(ruta_temp_excel):
         os.remove(ruta_temp_excel)

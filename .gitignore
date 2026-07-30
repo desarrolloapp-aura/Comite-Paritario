@@ -1,0 +1,12 @@
+*.pyc
+__pycache__/
+db.sqlite3
+.env
+env/
+.venv/
+media/evidencias_*
+media/firma_*
+media/docs/
+*.zip
+*.rar
+*.log
