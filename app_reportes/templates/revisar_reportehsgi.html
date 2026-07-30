@@ -1,0 +1,474 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Revisión Reporte HSGI N°{{ hsgi.id }} | Reportes SGI</title>
+    <link rel="icon" href="{% static 'imagenes/aura_ingeniera_s_a_logo.jpg' %}"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7ff 0%, #eef2ff 100%);
+            min-height: 100vh;
+            font-size: 18px;
+        }
+
+
+        #miFormulario {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #miFormulario label {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        #miFormulario input,
+        #miFormulario textarea,
+        #miFormulario select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: #fff;
+            font-size: 16px;
+        }
+
+        #miFormulario textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        #miFormulario input:focus,
+        #miFormulario textarea:focus,
+        #miFormulario select:focus {
+            outline: none;
+            border-color: #4f8ef7;
+            box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.15);
+            
+        }
+
+        #miFormulario .actions-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 6px;
+        }
+
+        #miFormulario .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #miFormulario .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .field-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+            
+        }
+
+        .help-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3b82f6;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: help;
+            line-height: 1;
+        }
+
+        .help-icon:hover {
+            background: #2563eb;
+        }
+
+        #miFormulario .btn-add {
+            background: #2e8b57;
+            color: white;
+        }
+
+        #miFormulario .btn-delete {
+            background: #dc3545;
+            color: white;
+            padding: 8px 10px;
+        }
+
+        #miFormulario .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 8px;
+            
+        }
+
+        #miFormulario .item-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+            
+        }
+
+        #miFormulario .item-card__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        #miFormulario .numero-item {
+            font-weight: 700;
+            color: #0f172a;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            background: #e0f2fe;
+        }
+
+        #miFormulario .item-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        #miFormulario .item-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        #miFormulario .item-field label {
+            font-size: 18px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        #miFormulario .item-field textarea,
+        #miFormulario .item-field input,
+        #miFormulario .item-field select {
+            width: 100%;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            #miFormulario .item-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        #miFormulario button[type="submit"] {
+            align-self: flex-start;
+            margin-top: 10px;
+            background: #008cba;
+            color: white;
+        }
+
+        .bloquecito {
+            background-color: #ebf5ff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+    </style>
+</head>
+
+<body>
+<nav class="navbar navbar-light bg-white shadow-sm">
+        <div class="container">
+            <img src="{% static 'imagenes/firmen.343.logo' %}" style="max-width:200px;"></img>
+            <a class="navbar-brand fw-bold text-secondary" href="/">Inicio</a>
+            {% if user.is_authenticated %}
+            <a class="navbar-brand fw-bold text-secondary" href="{% url 'lista_reportehsgi' %}">Volver</a>
+            <form action="{% url 'logout' %}" method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-sm">Cerrar Sesión</button>
+            </form>
+            {% else %}
+            <a class="navbar-brand fw-bold text-primary" href="login">Iniciar Sesión</a>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="container  py-4">
+        <div class="text-center mb-5">
+            <h4 class="fw-bold text-primary">Revisión de respuesta: Reporte HSGI N°{{hsgi.id}}</h4>
+        </div>
+
+
+
+        <form id="miFormulario" action="exportar_reportehsgi_pdf/{{ hsgi.id }}" method="POST" enctype="multipart/form-data" target="_blank">
+            {% csrf_token %}
+            <input type="hidden" name="hsgi" id="hsgi" value="{{hsgi.id}}" readonly>
+            <div class="bloquecito">
+                <h5>A. Antecedentes</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="txtnom_usu" class="field-label">
+                            Persona que reporta:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Escribe el nombre completo de quien realiza el reporte.">?</span>
+                        </label>
+                        <input type="text" name="txtnom_usu" id="txtnom_usu" value="{{hsgi.nombre_usuario_creador}}" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="txtema_usu" class="field-label">
+                            Ingrese su correo:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Ingresa un correo válido para recibir información relacionada.">?</span>
+                        </label>
+                        <input type="email" name="txtema_usu" id="txtema_usu" value="{{hsgi.correo_usuario_creador}}" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="txtcar" class="field-label">
+                            Ingrese su cargo:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Nombre del cargo de la persona que realiza el reporte.">?</span>
+                        </label>
+                        <input type="text" name="txtcar" id="txtcar" value="{{hsgi.cargo}}" readonly>
+                    </div>
+                    
+                </div>    
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="txtcen" class="field-label">
+                            Centro de trabajo/Obra:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Ingresa el nombre del centro de trabajo o obra donde se detectó el hallazgo.">?</span>
+                        </label>
+                        <input type="text" name="txtcen" id="txtcen" value="{{hsgi.centro_trabajo}}" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="txtfec" class="field-label">
+                            Fecha hallazgo:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Selecciona la fecha en la que se realiza la inspección.">?</span>
+                        </label>
+                        <input type="date" name="txtfec" id="txtfec" value="{{hsgi.fecha_hallazgo}}" readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="txthor" class="field-label">
+                            Hora:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Selecciona la hora en la que se realiza la inspección.">?</span>
+                        </label>
+                        <input type="time" name="txthor" id="txthor" value="{{hsgi.hora_hallazgo}}" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="txttur" class="field-label">
+                            Turno:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Selecciona el turno en el que se detectó el hallazgo.">?</span>
+                        </label>
+                        <input type="text" name="txttur" id="txttur" value="{{hsgi.turno}}" readonly>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="txtpro" class="field-label">
+                            Proceso del hallazgo:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Nombre del proceso en que se detectó el hallazgo.">?</span>
+                        </label>
+                        <input type="text" name="txtpro" id="txtpro" value="{{hsgi.proceso_hallazgo}}" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="txtact" class="field-label">
+                            Actividad involucrada:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Nombre de la actividad en que se detectó el hallazgo.">?</span>
+                        </label>
+                        <input type="text" name="txtact" id="txtact" value="{{hsgi.actividad_involucrada}}" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="txtlug" class="field-label">
+                            Lugar específico:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Nombre del lugar específico donde se detectó el hallazgo.">?</span>
+                        </label>
+                        <input type="text" name="txtlug" id="txtlug" value="{{hsgi.lugar_especifico}}" readonly>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="selamb" class="field-label">
+                            Ámbito del hallazgo:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Selecciona el ámbito del hallazgo.">?</span>
+                        </label>
+                        
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="text" name="selamb" id="selamb" value="{{hsgi.ambito_hallazgo}}" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="selcau" class="field-label">
+                            Causa:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Selecciona la causa del hallazgo.">?</span>
+                        </label>
+                        
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="text" name="selcau" id="selcau" value="{{hsgi.causa}}" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="selniv" class="field-label">
+                            Nivel de hallazgo:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Selecciona el nivel del hallazgo.">?</span>
+                        </label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="text" name="selniv" id="selniv" value="{{hsgi.nivel_hallazgo}}" readonly>
+                        </div>
+                    </div>
+                    
+                </div>  
+                <div class="row g-3">
+                    <div class="col-md-9">
+                        <label for="txtsup" class="field-label">
+                            Supervisor del hallazgo:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Nombre del supervisor al que se reporta el hallazgo.">?</span>
+                        </label>
+                        <input type="text" name="txtsup" id="txtsup" value="{{hsgi.supervisor_hallazgo}}" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="txtfec_cierre" class="field-label">
+                            Fecha cierre:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Selecciona la fecha en la que se cierra el hallazgo.">?</span>
+                        </label>
+                        <input type="text" name="txtfec_cierre" id="txtfec_cierre" value="{{hsgi.fecha_cierre}}" readonly>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bloquecito">
+                <h5>B. Descripción del hallazgo</h5>
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <textarea name="txtdes" id="txtdes" readonly>{{hsgi.descripcion_hallazgo}}</textarea>
+                    </div>
+                </div>    
+            </div>
+
+            <div class="bloquecito">
+                <h5>C. Acción inmediata/correctivas</h5>
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <textarea name="txtacc" id="txtacc" readonly>{{hsgi.accion_inmediata}}</textarea>
+                    </div>
+                </div>    
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="txtresp" class="field-label">
+                            Responsable de cierre de hallazgo:
+                            <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Nombre del responsable del cierre del hallazgo. Puede ser el mismo supervisor.">?</span>
+                        </label>
+                        <input type="text" name="txtresp" id="txtresp" readonly value="{{hsgi.responsable_cierre}}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="evidencia">Evidencias:</label>
+                        {% if hsgi.evidencias.exists %}
+                            <div style="display:flex; flex-direction:column; gap:6px;">
+                                {% for evidencia in hsgi.evidencias.all %}
+                                    <a href="{{ evidencia.archivo.url }}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:6px; color:#0d6efd; font-weight:600; text-decoration:none;">
+                                        <span>📎</span>
+                                        <span>Archivo {{ forloop.counter }}</span>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% elif hsgi.evidencia_cierre %}
+                            <a href="{{ hsgi.evidencia_cierre.url }}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:6px; color:#0d6efd; font-weight:600; text-decoration:none;">
+                                <span>📎</span>
+                                <span>Abrir evidencia</span>
+                            </a>
+                        {% else %}
+                            <span style="color:#6c757d; font-style:italic;">No se ha subido evidencia.</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row g-3">
+                <div class="col-md-12">
+                    
+
+                {% if hsgi.estado_cierre == 'PENDIENTE' %}
+                <button type="submit" class="btn" style="background-color: #ba0000; color: white; width:100%;" disabled>Exportar respuesta a PDF</button>
+                {% else %}<button type="submit" class="btn" style="background-color: #ba0000; color: white; width:100%;">Exportar respuesta a PDF</button>
+                {% endif %}
+                </div>
+            </div>
+        </form>
+        <br>
+        {% if mensaje %}
+        <div class="alert alert-success" role="alert">
+            {{ mensaje }}
+        </div>
+        {% endif %}
+        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+            <div class="col-md-4 d-flex align-items-center"> <a href="/"
+                    class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="Bootstrap"> <svg
+                        class="bi" width="30" height="24" aria-hidden="true">
+                        <use xlink:href="#bootstrap"></use>
+                    </svg> </a> <span class="mb-3 mb-md-0 text-body-secondary">© Aura Ingeniería S.A.</span> </div>
+            <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+                
+            </ul>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+    <script>
+    // 1. Crear un objeto con la fecha y hora actual
+    const ahora = new Date();
+
+    // 2. Obtener horas y minutos con ceros a la izquierda si son menores a 10
+    const horas = String(ahora.getHours()).padStart(2, '0');
+    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+
+    // 3. Unir en formato HH:MM
+    const horaFormateada = `${horas}:${minutos}`;
+
+    // 4. Asignar al valor del input
+    document.getElementById('txthor').value = horaFormateada;
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,564 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Evidencia de Obs. Conducta | Reportes SGI</title>
+    <link rel="icon" href="{% static 'imagenes/aura_ingeniera_s_a_logo.jpg' %}" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7ff 0%, #eef2ff 100%);
+            min-height: 100vh;
+            font-size: 18px;
+        }
+
+
+        #miFormulario {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #miFormulario label {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        #miFormulario input,
+        #miFormulario textarea,
+        #miFormulario select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background: #fff;
+        }
+
+        #miFormulario textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        #miFormulario input:focus,
+        #miFormulario textarea:focus,
+        #miFormulario select:focus {
+            outline: none;
+            border-color: #4f8ef7;
+            box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.15);
+        }
+
+        #miFormulario .actions-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 6px;
+        }
+
+        #miFormulario .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #miFormulario .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .field-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .help-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3b82f6;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: help;
+            line-height: 1;
+        }
+
+        .help-icon:hover {
+            background: #2563eb;
+        }
+
+        #miFormulario .btn-add {
+            background: #2e8b57;
+            color: white;
+        }
+
+        #miFormulario .btn-delete {
+            background: #dc3545;
+            color: white;
+            padding: 8px 10px;
+        }
+
+        #miFormulario .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        #miFormulario .item-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+        }
+
+        #miFormulario .item-card__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        #miFormulario .numero-item {
+            font-weight: 700;
+            color: #0f172a;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            background: #e0f2fe;
+        }
+
+        #miFormulario .item-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        #miFormulario .item-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        #miFormulario .item-field label {
+            font-size: 18px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        #miFormulario .item-field textarea,
+        #miFormulario .item-field input,
+        #miFormulario .item-field select {
+            width: 100%;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            #miFormulario .item-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        #miFormulario button[type="submit"] {
+            align-self: flex-start;
+            margin-top: 10px;
+            background: #008cba;
+            color: white;
+        }
+
+        .item-field {
+            margin-bottom: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Caja de botón para subir */
+        .file-upload-box {
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            color: #7f8181;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .file-upload-box:hover {
+            background-color: #e8f0fe;
+            border-color: #1a73e8;
+        }
+
+        /* Listado de archivos cargados */
+        .file-list {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Tarjeta individual de cada archivo */
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #ffffff;
+            border: 1px solid #dadce0;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .file-thumb {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .file-name {
+            font-size: 14px;
+            color: #3c4043;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .file-size {
+            font-size: 12px;
+            color: #70757a;
+        }
+
+        /* Botón de eliminar (X) */
+        .btn-remove {
+            background: none;
+            border: none;
+            color: #d93025;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 4px 20px;
+            border-radius: 20%;
+            transition: background 0.2s;
+        }
+
+        .btn-remove:hover {
+            background-color: #fce8e6;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-white shadow-sm">
+        <div class="container">
+            <img src="{% static 'imagenes/firmen.343.logo' %}" style="max-width:200px;"></img>
+            <a class="navbar-brand fw-bold text-secondary" href="/">Inicio</a>
+
+        </div>
+    </nav>
+    {% if obsconducta %}
+    <div class="container  py-4">
+        <div class="text-center mb-5">
+            <h4 class="fw-bold text-primary">Evidencia de Observación de Conducta N°{{obsconducta.id}}</h4>
+        </div>
+
+
+        <div id="miFormulario">
+            <input type="hidden" name="obsconducta" id="obsconducta" value="{{obsconducta.id}}" readonly>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="txtnom_usu" class="field-label">
+                        Su nombre:
+
+                    </label>
+                    <input type="text" name="txtnom_usu" id="txtnom_usu" value="{{obsconducta.nombre_usuario_creador}}"
+                        readonly>
+                </div>
+                <div class="col-md-3">
+                    <label for="txtema_usu" class="field-label">
+                        Su correo:
+
+                    </label>
+                    <input type="email" name="txtema_usu" id="txtema_usu" value="{{obsconducta.correo_usuario_creador}}"
+                        readonly>
+                </div>
+                <div class="col-md-3">
+                    <label for="txtper" class="field-label">
+                        Persona observada:
+
+                    </label>
+                    <input type="text" name="txtper" id="txtper" value="{{obsconducta.persona_observada}}" readonly>
+                </div>
+                <div class="col-md-3">
+                    <label for="txtfec" class="field-label">
+                        Fecha de observación:
+
+                    </label>
+                    <input type="text" name="txtfec" id="txtfec" value="{{obsconducta.fecha_observacion}}" readonly>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="txtant" class="field-label">
+                        Antigüedad en el puesto:
+
+                    </label>
+                    <input type="text" name="txtant" id="txtant" value="{{obsconducta.antiguedad_puesto}}" readonly>
+                </div>
+                <div class="col-md-3">
+                    <label for="txtare" class="field-label">
+                        Área de trabajo:
+
+                    </label>
+                    <input type="text" name="txtare" id="txtare" value="{{obsconducta.area_trabajo}}" readonly>
+                </div>
+                <div class="col-md-3">
+                    <label for="txttar" class="field-label">
+                        Tarea:
+
+                    </label>
+                    <input type="text" name="txttar" id="txttar" value="{{obsconducta.tarea}}" readonly>
+                </div>
+                <div class="col-md-3">
+                    <label for="sel_pla" class="field-label">
+                        Observación planificada:
+
+                    </label>
+                    <input type="text" name="sel_pla" id="sel_pla" value="{{obsconducta.observacion_planificada}}"
+                        readonly>
+                </div>
+
+
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label for="txtdes">Descripción:</label>
+                    <textarea name="txtdes" id="txtdes" readonly>{{obsconducta.descripcion_tarea}}</textarea>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label for="txtobs">Observación:</label>
+                    <textarea name="txtobs" id="txtobs" readonly>{{obsconducta.observacion}}</textarea>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label for="sel_mej">¿Se observó alguna práctica que merece ser reconocida o algunos aspectos del
+                        trabajo fueron mejorados?</label>
+                    <input type="text" name="txtare" id="txtare" value="{{obsconducta.mejora}}" readonly>
+                </div>
+            </div>
+
+
+
+            {% if hay_pendientes %}
+            {%for item in items %}
+            {% if item.cumplimiento == 'PENDIENTE'%}
+            <form action="enviar_evidencia_obsconducta/{{ item.observacion_conducta.token }}/{{ item.id }}/" method="POST"
+                enctype="multipart/form-data">
+                {% csrf_token %}
+                <div id="tablaItems" class="items-list">
+
+                    <div class="item-card">
+                        <div class="item-card__header">
+                            <span class="numero-item">{{item.numero_item}}</span>
+                        </div>
+                        <div class="item-grid">
+                            <div class="item-field">
+                                <label>Análisis de causa:</label>
+                                <textarea name="analisis[]" readonly>{{item.analisis_causa}}</textarea>
+                            </div>
+                            <div class="item-field">
+                                <label>Acciones correctivas:</label>
+                                <textarea name="acciones[]" readonly>{{item.acciones_correctivas}}</textarea>
+                            </div>
+                            <div class="item-field">
+                                <label>Responsable:</label>
+                                <input type="text" name="responsable[]" value="{{item.responsable}}" readonly>
+                            </div>
+                            <div class="item-field">
+                                <label>Fecha:</label>
+                                <input type="text" name="fecha[]" value="{{item.fecha_cumplimiento}}" readonly>
+                            </div>
+                            <div class="item-field">
+                                <label for="evidencia">Subir evidencias (Obligatorio para cerrar caso):</label>
+                                <div class="file-upload-box" onclick="this.querySelector('.file-input').click();">
+                                    <span class="upload-icon"></span>
+                                    <span>Añadir fotos o evidencias</span>
+                                    <input type="file" class="file-input" name="evidencia_{{ item.numero_item }}"
+                                        accept="image/*" required multiple style="display: none;">
+                                </div>
+
+                                <div class="file-list"></div>
+                                <small class="mt-2 text-muted">{{ item.evidencias.all|length }} evidencia/s cargada/s
+                                    previamente.</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <button type="submit" class="btn"
+                            style="background-color: #008CBA; color: white; width:100%">Finalizar Observación de
+                            conducta</button>
+                    </div>
+
+
+                </div>
+
+            </form>
+
+
+            {% endif %}
+            {% endfor %}
+
+
+        </div>
+        {% else %}
+        <div class="alert alert-success mt-3" role="alert">
+            No quedan evidencias pendientes. Puede finalizar el proceso firmando abajo.
+        </div>
+        <div class="card mt-3 p-3">
+            <h5>Firma de cierre</h5>
+            <p>Pulse el botón para abrir el panel de firma y guardar la imagen en la carpeta de media.</p>
+            {% if obsconducta.firma_creador %}<a
+                href="{% url 'firmar_obsconducta_creador' %}?obsconducta={{ obsconducta.token }}" class="btn btn-primary"
+                target="_blank" rel="noopener noreferrer">Firma ya realizada</a>
+            {% else %}<a href="{% url 'firmar_obsconducta_creador' %}?obsconducta={{ obsconducta.token }}"
+                class="btn btn-primary" target="_blank" rel="noopener noreferrer">Firmar responsable y finalizar</a>
+            {% endif %}
+            <br>
+            {% if obsconducta.firma_observado %}<a
+                href="{% url 'firmar_obsconducta_observado' %}?obsconducta={{ obsconducta.token }}" class="btn btn-primary"
+                target="_blank" rel="noopener noreferrer">Firmar ya realizada</a>
+            {% else %}<a href="{% url 'firmar_obsconducta_observado' %}?obsconducta={{ obsconducta.token }}"
+                class="btn btn-primary" target="_blank" rel="noopener noreferrer">Firmar observado/a y finalizar</a>
+            {% endif %}
+
+
+        </div>
+        {% endif %}
+        <hr>
+        {% if obsconducta.firma_creador and obsconducta.firma_observado %}
+        <a href="/exportar_obsconducta_pdf/{{ obsconducta.id }}" class="btn btn-danger" target="_blank"
+            rel="noopener noreferrer">Exportar respuesta a PDF</a>
+        {% else %}
+        <button type="submit" class="btn" style="background-color: #ba0000; color: white; width:100%;" disabled>Exportar
+            respuesta a PDF</button>
+        {% endif %}
+        <br>
+        {% if mensaje %}
+        <div class="alert alert-success" role="alert">
+            {{ mensaje }}
+        </div>
+        {% endif %}
+        {% else %}
+
+        Este lugar está muy desolado...
+        Oye, ¡¿qué haces aquí?!
+
+        {% endif%}
+        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+            <div class="col-md-4 d-flex align-items-center"> <a href="/"
+                    class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="Bootstrap"> <svg
+                        class="bi" width="30" height="24" aria-hidden="true">
+                        <use xlink:href="#bootstrap"></use>
+                    </svg> </a> <span class="mb-3 mb-md-0 text-body-secondary">© Aura Ingeniería S.A.</span> </div>
+            <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+
+            </ul>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Se activa individualmente para cada carta de ítem presente
+            document.querySelectorAll('.item-card').forEach(card => {
+                configurarSubidaArchivos(card);
+            });
+        });
+
+        function configurarSubidaArchivos(card) {
+            const fileInput = card.querySelector('.file-input');
+            const fileListContainer = card.querySelector('.file-list');
+            if (!fileInput || !fileListContainer) return;
+
+            const dt = new DataTransfer(); // Acumulador local por carta
+
+            fileInput.addEventListener('click', (e) => e.stopPropagation());
+
+            fileInput.addEventListener('change', function () {
+                for (let file of this.files) {
+                    dt.items.add(file);
+                }
+                this.files = dt.files;
+                renderizarLista();
+            });
+
+            function renderizarLista() {
+                fileListContainer.innerHTML = '';
+                Array.from(dt.files).forEach((file, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'file-item';
+                    const imgURL = URL.createObjectURL(file);
+                    const tamañoKB = (file.size / 1024).toFixed(1);
+
+                    item.innerHTML = `
+                        <div class="file-info">
+                            <img src="${imgURL}" class="file-thumb" alt="Preview">
+                            <div>
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-size">${tamañoKB} KB</div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-remove" onclick="eliminarArchivo(this, ${index})">&times;</button>
+                    `;
+                    fileListContainer.appendChild(item);
+                });
+            }
+
+            card.eliminarArchivo = function (index) {
+                dt.items.remove(index);
+                fileInput.files = dt.files;
+                renderizarLista();
+            };
+        }
+
+        function eliminarArchivo(btn, index) {
+            const card = btn.closest('.item-card');
+            if (card && card.eliminarArchivo) {
+                card.eliminarArchivo(index);
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -1,0 +1,704 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Obs. Conducta | Reportes SGI</title>
+        <link rel="icon" href="{% static 'imagenes/aura_ingeniera_s_a_logo.jpg' %}"/>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7ff 0%, #eef2ff 100%);
+            min-height: 100vh;
+            font-size: 20px;
+        }
+
+
+        #miFormulario {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #miFormulario label {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        #miFormulario input,
+        #miFormulario textarea,
+        #miFormulario select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background: #fff;
+        }
+
+        #miFormulario textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        #miFormulario input:focus,
+        #miFormulario textarea:focus,
+        #miFormulario select:focus {
+            outline: none;
+            border-color: #4f8ef7;
+            box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.15);
+        }
+
+        #miFormulario .actions-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 6px;
+        }
+
+        #miFormulario .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #miFormulario .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .field-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .help-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3b82f6;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: help;
+            line-height: 1;
+        }
+
+        .help-icon:hover {
+            background: #2563eb;
+        }
+
+        #miFormulario .btn-add {
+            background: #2e8b57;
+            color: white;
+        }
+
+        #miFormulario .btn-delete {
+            background: #dc3545;
+            color: white;
+            padding: 8px 10px;
+        }
+
+        #miFormulario .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        #miFormulario .item-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+        }
+
+        #miFormulario .item-card__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        #miFormulario .numero-item {
+            font-weight: 700;
+            color: #0f172a;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            background: #e0f2fe;
+        }
+
+        #miFormulario .item-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        #miFormulario .item-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        #miFormulario .item-field label {
+            font-size: 18px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        #miFormulario .item-field textarea,
+        #miFormulario .item-field input,
+        #miFormulario .item-field select {
+            width: 100%;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            #miFormulario .item-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        #miFormulario button[type="submit"] {
+            align-self: flex-start;
+            margin-top: 10px;
+            background: #008cba;
+            color: white;
+        }
+
+                .item-field {
+        margin-bottom: 20px;
+        font-family: Arial, sans-serif;
+        }
+
+/* Caja de botón para subir */
+.file-upload-box {
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    color: #7f8181;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.file-upload-box:hover {
+    background-color: #e8f0fe;
+    border-color: #1a73e8;
+}
+
+/* Listado de archivos cargados */
+.file-list {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Tarjeta individual de cada archivo */
+.file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: #ffffff;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.file-thumb {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.file-name {
+    font-size: 14px;
+    color: #3c4043;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.file-size {
+    font-size: 12px;
+    color: #70757a;
+}
+
+/* Botón de eliminar (X) */
+.btn-remove {
+    background: none;
+    border: none;
+    color: #d93025;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px 20px;
+    border-radius: 20%;
+    transition: background 0.2s;
+}
+
+.btn-remove:hover {
+    background-color: #fce8e6;
+}
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-light bg-white shadow-sm">
+        <div class="container">
+            <img src="{% static 'imagenes/firmen.343.logo' %}" style="max-width:200px;"></img>
+            <a class="navbar-brand fw-bold text-secondary" href="/">Inicio</a>
+            {% if user.is_authenticated %}
+            <a class="navbar-brand fw-bold text-secondary" href="menu_listas">Menú</a>
+            <form action="{% url 'logout' %}" method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-sm">Cerrar Sesión</button>
+            </form>
+            {% else %}
+            <a class="navbar-brand fw-bold text-primary" href="login">Iniciar Sesión</a>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="container  py-4">
+        <div class="text-center mb-5">
+            <h4 class="fw-bold text-primary">Formulario de Observaciones de Conducta</h4>
+        </div>
+
+        
+        <form id="miFormulario" action="/enviar_obsconducta" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="txtnom_usu" class="field-label">
+                        Ingrese su nombre:
+                        <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Escribe el nombre completo de quien realiza la observación de conducta.">?</span>
+                    </label>
+                    <input type="text" name="txtnom_usu" id="txtnom_usu" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="txtema_usu" class="field-label">
+                        Ingrese su correo:
+                        <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Ingresa un correo válido para recibir información relacionada.">?</span>
+                    </label>
+                    <input type="email" name="txtema_usu" id="txtema_usu" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="txtper" class="field-label">
+                        Persona observada:
+                        <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Nombre de la persona que está siendo observada.">?</span>
+                    </label>
+                    <input type="text" name="txtper" id="txtper" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="txtfec" class="field-label">
+                        Fecha de observación:
+                        <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Selecciona la fecha en la que observó a la persona trabajadora.">?</span>
+                    </label>
+                    <input type="date" name="txtfec" id="txtfec" required max="{{ today|date:'Y-m-d' }}">
+                </div>
+            </div>    
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="txtant" class="field-label">
+                        Antigüedad en el puesto:
+                        <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Indique cantidad de meses o años que lleva la persona observada en su puesto actual.">?</span>
+                    </label>
+                    <input type="text" name="txtant" id="txtant" required>
+                </div>
+                 <div class="col-md-3">
+                    <label for="txtare" class="field-label">
+                        Área de trabajo:
+                        <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Área de trababajo de la persona observada.">?</span>
+                    </label>
+                    <input type="text" name="txtare" id="txtare" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="txttar" class="field-label">
+                        Tarea:
+                        <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Tarea que realiza la persona mientras está siendo observada.">?</span>
+                    </label>
+                    <input type="text" name="txttar" id="txttar" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="sel_pla" class="field-label">
+                        Observación planificada:
+                        <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Indica si la observación fue planificada con antelación.">?</span>
+                    </label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="radio" name="sel_pla" value="SI" checked>Sí
+                        <input type="radio" name="sel_pla" value="NO">No
+                    </div>
+                </div>
+
+                
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label for="txtdes">Descripción:
+                        <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Descripción de la actividad observada, de forma simplificada el orden secuencial de las operaciones fundamentales en que puede subdividirse la tarea.">?</span>
+                    </label>
+                    <textarea name="txtdes" id="txtdes" required placeholder="Escribe la descripción..."></textarea>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label for="txtobs">Observación:
+                        <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Indicar cualquier desviación que se observe en el proceso que requiera análisis causal.">?</span>
+                    </label>
+                    <textarea name="txtobs" id="txtobs" required placeholder="Escribe la observación..."></textarea>
+                </div>
+            </div>
+
+            <div id="tablaItems" class="items-list">
+                <div class="item-card">
+                    <div class="item-card__header">
+                        <span class="numero-item">1</span>
+                        <button type="button" class="btn btn-delete" onclick="eliminarFila(this)" disabled>✕</button>
+                    </div>
+                    <div class="item-grid">
+                        <div class="item-field">
+                            <label>Análisis de causa:
+                                <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Indicar las causas por las cuales se origino el acto subestandar, si no existen acciones, colocar que no aplica.">?</span>
+                            </label>
+                            <textarea name="analisis[]" required placeholder="Escribe el análisis de causa..."></textarea>
+                        </div>
+                        <div class="item-field">
+                            <label>Acciones correctivas:
+                                <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Para mayor eficacia, primero el observador y observado deben dialogar la necesidad de mejora para determinar las acciones correctivas..">?</span>
+                            </label>
+                            <textarea name="acciones[]" required placeholder="Escribe las acciones correctivas..."></textarea>
+                        </div>
+                        <div class="item-field">
+                            <label>Responsable:
+                                <span class="help-icon" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Persona responsable de ejecutar la actividad.">?</span>
+                            </label>
+                            <input type="text" name="responsable[]" required placeholder="Nombre">
+                        </div>
+                        <div class="item-field">
+                            <label>Fecha de cierre:</label>
+                            <input type="date" name="fecha[]" required>
+                        </div>
+                        <div class="item-field">
+                            <label for="evidencia">Subir evidencias (En caso de ser necesario):</label>
+                            
+                            <div class="file-upload-box" onclick="document.getElementById('evidencia').click();">
+                                <span class="upload-icon"></span>
+                                <span>Añadir fotos o evidencias</span>
+                                <input type="file" id="evidencia" name="evidencia_1" accept="image/*" multiple style="display: none;">
+                            </div>
+
+                            <div id="lista-evidencias" class="file-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="actions-container">
+                <!-- Botón para añadir filas -->
+                <button type="button" class="btn btn-add" id="agregarFila">＋ Añadir Ítem</button>
+            </div>
+
+            <div class="row g-3">
+                <label for="sel_mej">¿Se observó alguna práctica que merece ser reconocida o algunos aspectos del trabajo fueron mejorados?</label>
+                <div class="col-md-2">
+            
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="radio" name="sel_mej" value="SI" checked>Sí
+                        <input type="radio" name="sel_mej" value="NO">No
+                    </div>
+                </div>
+            </div>
+<hr>
+            <button type="submit" class="btn" style="background-color: #008CBA; color: white; width:100%;">Enviar Formulario</button>
+
+        </form>
+        <br>
+        {% if mensaje %}
+        <div class="alert alert-success" role="alert">
+            {{ mensaje }}
+        </div>
+        {% endif %}
+        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+            <div class="col-md-4 d-flex align-items-center"> <a href="/"
+                    class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="Bootstrap"> <svg
+                        class="bi" width="30" height="24" aria-hidden="true">
+                        <use xlink:href="#bootstrap"></use>
+                    </svg> </a> <span class="mb-3 mb-md-0 text-body-secondary">© Aura Ingeniería S.A.</span> </div>
+            <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+                
+            </ul>
+        </footer>
+    </div>
+
+
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+    <script>
+        const fileInput = document.getElementById('evidencia');
+        const fileListContainer = document.getElementById('lista-evidencias');
+
+        // Objeto especial para manipular y acumular archivos
+        const dt = new DataTransfer();
+
+        fileInput.addEventListener('change', function () {
+            // 1. Acumular los nuevos archivos seleccionados en DataTransfer
+            for (let file of this.files) {
+                dt.items.add(file);
+            }
+
+            // 2. Sincronizar los archivos acumulados de vuelta con el input original
+            this.files = dt.files;
+
+            // 3. Renderizar la lista visual
+            renderFileList();
+        });
+
+        function renderFileList() {
+            fileListContainer.innerHTML = ''; // Limpiar listado previo
+
+            Array.from(dt.files).forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+
+                // Generar miniatura si es imagen
+                const imgURL = URL.createObjectURL(file);
+                const tamañoKB = (file.size / 1024).toFixed(1);
+
+                item.innerHTML = `
+                    <div class="file-info">
+                        <img src="${imgURL}" class="file-thumb" alt="Preview">
+                        <div>
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${tamañoKB} KB</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-remove" onclick="eliminarArchivo(${index})">&times;</button>
+                `;
+
+                fileListContainer.appendChild(item);
+            });
+        }
+
+        function eliminarArchivo(index) {
+            // 1. Remover el archivo específico según su posición
+            dt.items.remove(index);
+
+            // 2. Actualizar el input con la lista corregida
+            fileInput.files = dt.files;
+
+            // 3. Re-renderizar la vista
+            renderFileList();
+        }
+    </script>
+    <script>
+        const tabla = document.getElementById('tablaItems');
+const botonAgregar = document.getElementById('agregarFila');
+
+botonAgregar.addEventListener('click', () => {
+    const items = tabla.querySelectorAll('.item-card');
+    const numeroItem = items.length + 1;
+    const nuevaCarta = document.createElement('div');
+    nuevaCarta.className = 'item-card';
+
+    // Importante: Quitamos los IDs fijos y usamos clases (.file-input, .file-list)
+    // El onclick usa navegacion relativa: this.querySelector('.file-input').click()
+    nuevaCarta.innerHTML = `
+                <div class="item-card__header">
+                    <span class="numero-item">${numeroItem}</span>
+                    <button type="button" class="btn btn-delete" onclick="eliminarFila(this)">✕</button>
+                </div>
+                <div class="item-grid">
+                    <div class="item-field">
+                        <label>Análisis de causa:</label>
+                        <textarea name="analisis[]" required placeholder="Escribe el análisis de causa..."></textarea>
+                    </div>
+                    <div class="item-field">
+                        <label>Acciones correctivas:</label>
+                        <textarea name="acciones[]" required placeholder="Escribe las acciones correctivas..."></textarea>
+                    </div>
+                    <div class="item-field">
+                        <label>Responsable:</label>
+                        <input type="text" name="responsable[]" required placeholder="Nombre">
+                    </div>
+                    <div class="item-field">
+                        <label>Fecha de cierre:</label>
+                        <input type="date" name="fecha[]" required>
+                    </div>
+                    <div class="item-field">
+                        <label>Subir evidencias (En caso de ser necesario):</label>
+                        
+                        <div class="file-upload-box" onclick="this.querySelector('.file-input').click();">
+                            <span class="upload-icon"></span>
+                            <span>Añadir fotos o evidencias</span>
+                            <input type="file" class="file-input" name="evidencia_${numeroItem}" accept="image/*" multiple style="display: none;">
+                        </div>
+
+                        <div class="file-list"></div>
+                    </div>
+                </div>
+            `;
+
+    tabla.appendChild(nuevaCarta);
+    
+    // Inicializamos la lógica independiente de subida de archivos para este ítem
+    configurarSubidaArchivos(nuevaCarta);
+
+    actualizarBotonesYNumeracion();
+});
+
+// Configura la acumulación, vista previa y borrado de fotos de UN ítem en particular
+function configurarSubidaArchivos(card) {
+    const fileInput = card.querySelector('.file-input');
+    const fileListContainer = card.querySelector('.file-list');
+    const dt = new DataTransfer(); // Acumulador de archivos propio de este ítem
+
+    // Evita que al hacer clic directo sobre el input se dispare el evento del padre
+    fileInput.addEventListener('click', (e) => e.stopPropagation());
+
+    fileInput.addEventListener('change', function () {
+        for (let file of this.files) {
+            dt.items.add(file);
+        }
+        this.files = dt.files;
+        renderizarLista();
+    });
+
+    function renderizarLista() {
+        fileListContainer.innerHTML = '';
+        Array.from(dt.files).forEach((file, index) => {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            const imgURL = URL.createObjectURL(file);
+            const tamañoKB = (file.size / 1024).toFixed(1);
+
+            item.innerHTML = `
+                <div class="file-info">
+                    <img src="${imgURL}" class="file-thumb" alt="Preview">
+                    <div>
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${tamañoKB} KB</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-remove" onclick="eliminarArchivo(this, ${index})">&times;</button>
+            `;
+            fileListContainer.appendChild(item);
+        });
+    }
+
+    // Guardamos la función en la propia carta para poder llamarla al eliminar un archivo
+    card.eliminarArchivo = function(index) {
+        dt.items.remove(index);
+        fileInput.files = dt.files;
+        renderizarLista();
+    };
+}
+
+function eliminarArchivo(btn, index) {
+    const card = btn.closest('.item-card');
+    if (card && card.eliminarArchivo) {
+        card.eliminarArchivo(index);
+    }
+}
+
+function eliminarFila(boton) {
+    const carta = boton.closest('.item-card');
+    if (carta) {
+        carta.remove();
+        actualizarBotonesYNumeracion();
+    }
+}
+
+function actualizarBotonesYNumeracion() {
+    const items = tabla.querySelectorAll('.item-card');
+
+    items.forEach((item, index) => {
+        const numero = item.querySelector('.numero-item');
+        const botonEliminar = item.querySelector('.btn-delete');
+        const fileInput = item.querySelector('.file-input');
+
+        const i = index + 1;
+
+        if (numero) {
+            numero.textContent = i;
+        }
+
+        // Renombramos el input de archivos para que mantenga el orden (evidencia_1, evidencia_2, etc.)
+        if (fileInput) {
+            fileInput.name = `evidencia_${i}`;
+        }
+
+        if (botonEliminar) {
+            botonEliminar.disabled = items.length === 1;
+        }
+    });
+
+    botonAgregar.disabled = items.length >= 4;
+}
+
+// Inicializar la primera carta si ya existe al cargar la página
+document.querySelectorAll('.item-card').forEach(card => configurarSubidaArchivos(card));
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar el escuchador de archivos en todas las cartas existentes (como el Ítem 1)
+    document.querySelectorAll('.item-card').forEach(card => {
+        configurarSubidaArchivos(card);
+    });
+});
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
+</body>
+</html>

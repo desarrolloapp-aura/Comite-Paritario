@@ -1,0 +1,14 @@
+pip install Pillow
+-para soportar imagefield en models.py
+
+pip install openpyxl
+pip install docxtpl
+pip install docx2pdf
+
+sugerencia:
+supabase
+render
+netlify
+
+---
+editar "subir evidencias" a múltiples

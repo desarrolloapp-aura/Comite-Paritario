@@ -1,0 +1,62 @@
+Celda 1: {% tr for item in items %}{{ item.numero_item }}
+
+Celda 2: {{ item.observaciones }}
+
+Celda 3: {{ item.grado_riesgo }}{% trendfor %}
+
+{{item.numero_item}}	{{item.recomendaciones}}	{{item.responsable_accion}}	{{item.fecha_cumplimiento}}
+
+{{item.numero_item}}	{%if item.cumplimiento == ‘SI’ %}X{%endif%}	{%if item.cumplimiento == ‘NO’ %}X{%endif%}	{%if item.cumplimiento == ‘PENDIENTE’ %}X{%endif%}
+
+
+
+   correo_destino = nueva_obsconducta.correo_usuario_creador
+
+    if correo_destino:
+        #url_subir_evidencia = f"http://localhost:8000/obsconducta/evidencia_obsconducta/{nueva_obsconducta.id}"
+
+        resumen_tabla = ""
+        for it in items_creados:
+            resumen_tabla += (
+                f"- Ítem N°{it.numero_item}: {it.observaciones}\n"
+                f"  • Análisis de causa: {it.analisis_causa} \n"
+                f"  • Acciones Correctivas: {it.acciones_correctivas} \n"
+                f"  • Responsable: {it.responsable} \n"
+                f"  • Fecha Límite: {it.fecha_cumplimiento}\n\n"
+            )
+        asunto = f"Respuesta enviada a Observación de Conducta - {nueva_obsconducta.area_trabajo}"
+        
+        mensaje = f"""
+Estimado/a {nueva_obsconducta.realizada_por},
+
+Se ha registrado exitosamente la observación de conducta con los siguientes detalles:
+
+DATOS GENERALES:
+- Persona observada: {nueva_obsconducta.persona_observada}
+- Antigüedad: {nueva_obsconducta.antiguedad_puesto}
+- Área de trabajo: {nueva_obsconducta.area_trabajo}
+- Tarea: {nueva_obsconducta.tarea}
+- Fecha: {nueva_obsconducta.fecha_observacion}
+- Observación planificada: {nueva_obsconducta.observacion_planificada}
+
+ÍTEMS Y OBSERVACIONES REGISTRADAS:
+{resumen_tabla}
+Favor ingresar al sistema para firmar y dar cierre a las observaciones:
+
+
+Atentamente,
+Sistema de Gestión Integrado (SGI)
+"""
+
+        try:
+            # 2. Enviamos el correo
+            send_mail(
+                subject=asunto,
+                message=mensaje,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[correo_destino],
+                fail_silently=True  # Pon en False si deseas ver errores de SMTP en consola durante pruebas
+            )
+        except Exception as e:
+            # Si falla el servidor de correo, la inspección de todas formas queda guardada
+            print(f"Error al enviar el correo: {e}")

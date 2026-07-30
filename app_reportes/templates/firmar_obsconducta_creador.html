@@ -1,0 +1,268 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>Firma de observación de conducta | Reportes SGI</title>
+      <link rel="icon" href="{% static 'imagenes/aura_ingeniera_s_a_logo.jpg' %}"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7ff 0%, #eef2ff 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .paint-area {
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 16px;
+      width: min(90vw, 720px);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+      border: 1px solid #e2e8f0;
+    }
+
+    .paint-area h2 {
+      text-align: center;
+      margin: 0 0 16px;
+      color: #0f172a;
+      font-size: 28px;
+    }
+
+    .controls {
+      margin-bottom: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .controls label {
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .controls input,
+    .controls select,
+    .controls button {
+      padding: 8px 10px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .controls button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .controls button:hover {
+      transform: translateY(-1px);
+    }
+
+    .controls button:last-child {
+      background: #0f766e;
+    }
+
+    canvas {
+      border: 1px solid #cbd5e1;
+      background: white;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: inset 0 0 0 1px #f1f5f9;
+    }
+
+    canvas.eraser {
+      cursor: crosshair;
+    }
+</style>
+</head>
+<body>
+<div class="paint-area">
+    <h2>Firme aquí observador</h2>
+
+    <div class="controls">
+        <!--<label for="color">Color</label>-->
+        <input type="hidden" id="color" value="#000758">
+
+        <!--<label>Tamaño</label>-->
+        <input type="hidden" id="size" value="3">
+
+        <input type="hidden" id="tool" value="brush">
+        <!--<label for="tool">Herramienta</label>
+        <select id="tool">
+            
+            <option value="eraser">Goma</option>
+            <option value="rect">Rectángulo</option>
+            <option value="circle">Círculo</option>
+            <option value="text">Texto</option>
+        </select>-->
+
+        <input type="text" id="textInput" placeholder="Texto..." style="display: none;">
+
+        <button onclick="undoCanvas()">Deshacer</button>
+        <button onclick="clearCanvas()">Limpiar todo</button>
+        
+    </div>
+
+    <canvas id="canvas" width="600" height="375"></canvas>
+    <div class="controls" style="margin-top: 16px;">
+        <button onclick="guardarFirma()">Guardar firma</button>
+    </div><footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+            <div class="col-md-4 d-flex align-items-center"> <a href="/"
+                    class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="Bootstrap"> <svg
+                        class="bi" width="30" height="24" aria-hidden="true">
+                        <use xlink:href="#bootstrap"></use>
+                    </svg> </a> <span class="mb-3 mb-md-0 text-body-secondary">© Aura Ingeniería S.A.</span> </div>
+            <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+                
+            </ul>
+        </footer>
+  </div>
+</div>
+    
+<script>
+  // Portada
+    function mostrarPortada(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function (e) {
+        document.getElementById("previewPortada").src = e.target.result;
+        };
+        if (file) reader.readAsDataURL(file);
+    }
+
+  // Paint
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    let painting = false, startX, startY;
+    const history = [];
+
+    const color = document.getElementById("color");
+    const size = document.getElementById("size");
+    const tool = document.getElementById("tool");
+    const textInput = document.getElementById("textInput");
+
+    function getCanvasPosition(event) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return {
+            x: (event.clientX - rect.left) * scaleX,
+            y: (event.clientY - rect.top) * scaleY
+        };
+    }
+
+    tool.addEventListener("change", () => {
+        textInput.style.display = tool.value === "text" ? "inline" : "none";
+        canvas.classList.toggle("eraser", tool.value === "eraser");
+    });
+
+    canvas.addEventListener("mousedown", e => {
+        const pos = getCanvasPosition(e);
+        painting = true;
+        startX = pos.x;
+        startY = pos.y;
+        if (tool.value === "brush" || tool.value === "eraser") {
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        }
+    });
+
+    canvas.addEventListener("mouseup", e => {
+        if (!painting) return;
+        painting = false;
+        const pos = getCanvasPosition(e);
+        const endX = pos.x, endY = pos.y;
+        ctx.lineWidth = size.value;
+        ctx.strokeStyle = (tool.value === "eraser") ? "#ffffff" : color.value;
+        ctx.fillStyle = color.value;
+
+        if (tool.value === "rect") {
+            ctx.strokeRect(startX, startY, endX - startX, endY - startY);
+        } else if (tool.value === "circle") {
+            const r = Math.hypot(endX - startX, endY - startY);
+            ctx.beginPath();
+            ctx.arc(startX, startY, r, 0, 2 * Math.PI);
+            ctx.stroke();
+        } else if (tool.value === "text") {
+            ctx.font = `${size.value * 4}px Arial`;
+            ctx.fillText(textInput.value, startX, startY);
+        }
+        ctx.beginPath();
+    });
+
+    canvas.addEventListener("mousemove", e => {
+        if (!painting || (tool.value !== "brush" && tool.value !== "eraser")) return;
+        const pos = getCanvasPosition(e);
+        ctx.strokeStyle = (tool.value === "eraser") ? "#ffffff" : color.value;
+        ctx.lineWidth = size.value;
+        ctx.lineCap = "round";
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    });
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        history.length = 0;
+    }
+
+    function undoCanvas() {
+        if (history.length === 0) return;
+        const previous = history.pop();
+        ctx.putImageData(previous, 0, 0);
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
+            event.preventDefault();
+            undoCanvas();
+        }
+    });
+
+    function guardarFirma() {
+        const firmaData = canvas.toDataURL('image/png');
+        const obsconductaId = new URLSearchParams(window.location.search).get('obsconducta');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch(`/guardar_firma_obsconducta_creador/${obsconductaId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: `firma_data=${encodeURIComponent(firmaData)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.ok) {
+                window.location.href = `obsconducta/evidencia_obsconducta/${obsconductaId}`;
+            } else {
+                alert('No se pudo guardar la firma.');
+            }
+        })
+        .catch(() => alert('Ocurrió un error al guardar la firma.'));
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
+</body>
+</html>
