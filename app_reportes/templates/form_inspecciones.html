@@ -417,15 +417,15 @@
                             <input type="date" name="fecha[]" required min="{{ today|date:'Y-m-d' }}">
                         </div>
                         <div class="item-field">
-                            <label for="evidencia">Subir evidencias (En caso de ser necesario):</label>
+                            <label>Subir evidencias (En caso de ser necesario):</label>
                             
-                            <div class="file-upload-box" onclick="document.getElementById('evidencia').click();">
+                            <div class="file-upload-box" onclick="this.querySelector('.file-input').click();">
                                 <span class="upload-icon"></span>
                                 <span>Añadir fotos o evidencias</span>
-                                <input type="file" id="evidencia" name="evidencia_1" accept="image/*" multiple style="display: none;">
+                                <input type="file" class="file-input" name="evidencia_1" accept="image/*" multiple style="display: none;">
                             </div>
 
-                            <div id="lista-evidencias" class="file-list"></div>
+                            <div class="file-list"></div>
                         </div>
                     </div>
                 </div>
@@ -467,63 +467,7 @@
             });
         });
     </script>
-    <script>
-        const fileInput = document.getElementById('evidencia');
-        const fileListContainer = document.getElementById('lista-evidencias');
 
-        // Objeto especial para manipular y acumular archivos
-        const dt = new DataTransfer();
-
-        fileInput.addEventListener('change', function () {
-            // 1. Acumular los nuevos archivos seleccionados en DataTransfer
-            for (let file of this.files) {
-                dt.items.add(file);
-            }
-
-            // 2. Sincronizar los archivos acumulados de vuelta con el input original
-            this.files = dt.files;
-
-            // 3. Renderizar la lista visual
-            renderFileList();
-        });
-
-        function renderFileList() {
-            fileListContainer.innerHTML = ''; // Limpiar listado previo
-
-            Array.from(dt.files).forEach((file, index) => {
-                const item = document.createElement('div');
-                item.className = 'file-item';
-
-                // Generar miniatura si es imagen
-                const imgURL = URL.createObjectURL(file);
-                const tamañoKB = (file.size / 1024).toFixed(1);
-
-                item.innerHTML = `
-                    <div class="file-info">
-                        <img src="${imgURL}" class="file-thumb" alt="Preview">
-                        <div>
-                            <div class="file-name">${file.name}</div>
-                            <div class="file-size">${tamañoKB} KB</div>
-                        </div>
-                    </div>
-                    <button type="button" class="btn-remove" onclick="eliminarArchivo(${index})">&times;</button>
-                `;
-
-                fileListContainer.appendChild(item);
-            });
-        }
-
-        function eliminarArchivo(index) {
-            // 1. Remover el archivo específico según su posición
-            dt.items.remove(index);
-
-            // 2. Actualizar el input con la lista corregida
-            fileInput.files = dt.files;
-
-            // 3. Re-renderizar la vista
-            renderFileList();
-        }
-    </script>
     <script>
         const tabla = document.getElementById('tablaItems');
 const botonAgregar = document.getElementById('agregarFila');
