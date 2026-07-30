@@ -269,7 +269,7 @@ def enviar_inspeccion(request):
     correo_destino = nueva_inspeccion.correo_usuario_creador
 
     if correo_destino:
-        url_subir_evidencia = f"http://localhost:8000/inspecciones/evidencia_inspeccion/{nueva_inspeccion.token}"
+        url_subir_evidencia = f"https://reportes-sgi.onrender.com/inspecciones/evidencia_inspeccion/{nueva_inspeccion.token}"
 
         resumen_tabla = ""
         for it in items_creados:
@@ -397,7 +397,7 @@ def enviar_obsconducta(request):
     correo_destino = nueva_obsconducta.correo_usuario_creador
 
     if correo_destino:
-        url_subir_evidencia = f"http://localhost:8000/obsconducta/evidencia_obsconducta/{nueva_obsconducta.token}"
+        url_subir_evidencia = f"https://reportes-sgi.onrender.com/obsconducta/evidencia_obsconducta/{nueva_obsconducta.token}"
 
         resumen_tabla = ""
         for it in items_creados:
@@ -522,7 +522,7 @@ def enviar_reportehsgi(request):
     correo_destino = nueva_hsgi.correo_usuario_creador
 
     if correo_destino:
-        url_subir_evidencia = f"http://localhost:8000/reportehsgi/evidencia_hsgi/{nueva_hsgi.token}"
+        url_subir_evidencia = f"https://reportes-sgi.onrender.com/reportehsgi/evidencia_hsgi/{nueva_hsgi.token}"
 
 
         asunto = f"Respuesta enviada a Reportes HSGI - {nueva_hsgi.centro_trabajo}"
