@@ -148,6 +148,26 @@
 
   // Paint
     const canvas = document.getElementById("canvas");
+    
+    // Soporte para pantallas táctiles (móviles)
+    function touchHandler(e) {
+        if(e.cancelable) e.preventDefault(); // Evita que la pantalla se mueva al firmar
+        var touch = e.changedTouches[0];
+        var type = "";
+        if (e.type === "touchstart") type = "mousedown";
+        else if (e.type === "touchmove") type = "mousemove";
+        else if (e.type === "touchend") type = "mouseup";
+        
+        var mouseEvent = new MouseEvent(type, {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+    }
+    canvas.addEventListener("touchstart", touchHandler, {passive: false});
+    canvas.addEventListener("touchmove", touchHandler, {passive: false});
+    canvas.addEventListener("touchend", touchHandler, {passive: false});
+
     const ctx = canvas.getContext("2d");
     let painting = false, startX, startY;
     const history = [];
