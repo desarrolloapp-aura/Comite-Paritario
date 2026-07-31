@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'anymail',
     'app_reportes'
 ]
 
@@ -133,13 +134,21 @@ STORAGES = {
     },
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'desarrolloapp@aura.cl'
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = 'no-reply@reportes-sgi.local'
+resend_api_key = config('RESEND_API_KEY', default='')
+if resend_api_key:
+    EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+    ANYMAIL = {
+        "RESEND_API_KEY": resend_api_key,
+    }
+    DEFAULT_FROM_EMAIL = 'onboarding@resend.dev'  # Default Resend test sender
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = 'desarrolloapp@aura.cl'
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+    DEFAULT_FROM_EMAIL = 'no-reply@reportes-sgi.local'
 
 # A dónde redirigir tras un login exitoso
 LOGIN_REDIRECT_URL = 'menu_listas'
