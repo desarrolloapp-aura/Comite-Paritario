@@ -24,7 +24,7 @@ def enviar_correo_async(asunto, mensaje, from_email, recipient_list):
         payload = {
             "asunto": asunto,
             "mensaje": mensaje,
-            "destinatarios": recipient_list,
+            "destinatarios": recipient_list[0] if isinstance(recipient_list, list) and recipient_list else recipient_list,
             "remitente": from_email
         }
         requests.post(webhook_url, json=payload, timeout=15)
