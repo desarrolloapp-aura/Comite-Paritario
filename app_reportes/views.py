@@ -10,6 +10,19 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
+import threading
+
+def enviar_correo_async(asunto, mensaje, from_email, recipient_list):
+    try:
+        send_mail(
+            subject=asunto,
+            message=mensaje,
+            from_email=from_email,
+            recipient_list=recipient_list,
+            fail_silently=True
+        )
+    except Exception as e:
+        print(f"Error al enviar el correo: {e}")
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
@@ -302,17 +315,14 @@ Sistema de Gestión Integrado (SGI)
 """
 
         try:
-            # 2. Enviamos el correo
-            send_mail(
-                subject=asunto,
-                message=mensaje,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[correo_destino],
-                fail_silently=True  # Pon en False si deseas ver errores de SMTP en consola durante pruebas
-            )
+            # 2. Enviamos el correo en segundo plano
+            threading.Thread(
+                target=enviar_correo_async,
+                args=(asunto, mensaje, settings.DEFAULT_FROM_EMAIL, [correo_destino])
+            ).start()
         except Exception as e:
-            # Si falla el servidor de correo, la inspección de todas formas queda guardada
-            print(f"Error al enviar el correo: {e}")
+            # Si falla el hilo, la inspección de todas formas queda guardada
+            print(f"Error al iniciar hilo de correo: {e}")
 
     # =========================================================================
 
