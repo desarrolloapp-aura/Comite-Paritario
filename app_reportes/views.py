@@ -15,9 +15,9 @@ import requests
 from decouple import config
 
 def enviar_correo_async(asunto, mensaje, from_email, recipient_list):
-    webhook_url = config('MAKE_WEBHOOK_URL', default='')
+    webhook_url = config('GOOGLE_WEBHOOK_URL', default='')
     if not webhook_url:
-        print("Webhook no configurado (MAKE_WEBHOOK_URL)")
+        print("Webhook de Google no configurado")
         return
         
     try:
@@ -28,9 +28,9 @@ def enviar_correo_async(asunto, mensaje, from_email, recipient_list):
             "remitente": from_email
         }
         requests.post(webhook_url, json=payload, timeout=15)
-        print("Webhook enviado a Make exitosamente")
+        print("Webhook enviado a Google exitosamente")
     except Exception as e:
-        print(f"Error al enviar Webhook a Make: {e}")
+        print(f"Error al enviar Webhook a Google: {e}")
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
