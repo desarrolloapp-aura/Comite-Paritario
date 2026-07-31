@@ -377,20 +377,7 @@
             });
         });
     </script>
-    <script>
-    // 1. Crear un objeto con la fecha y hora actual
-    const ahora = new Date();
 
-    // 2. Obtener horas y minutos con ceros a la izquierda si son menores a 10
-    const horas = String(ahora.getHours()).padStart(2, '0');
-    const minutos = String(ahora.getMinutes()).padStart(2, '0');
-
-    // 3. Unir en formato HH:MM
-    const horaFormateada = `${horas}:${minutos}`;
-
-    // 4. Asignar al valor del input
-    document.getElementById('txthor').value = horaFormateada;
-    </script>
 </body>
 
 </html>
