@@ -11,18 +11,26 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
 import threading
+import requests
+from decouple import config
 
 def enviar_correo_async(asunto, mensaje, from_email, recipient_list):
+    webhook_url = config('MAKE_WEBHOOK_URL', default='')
+    if not webhook_url:
+        print("Webhook no configurado (MAKE_WEBHOOK_URL)")
+        return
+        
     try:
-        send_mail(
-            subject=asunto,
-            message=mensaje,
-            from_email=from_email,
-            recipient_list=recipient_list,
-            fail_silently=True
-        )
+        payload = {
+            "asunto": asunto,
+            "mensaje": mensaje,
+            "destinatarios": recipient_list,
+            "remitente": from_email
+        }
+        requests.post(webhook_url, json=payload, timeout=15)
+        print("Webhook enviado a Make exitosamente")
     except Exception as e:
-        print(f"Error al enviar el correo: {e}")
+        print(f"Error al enviar Webhook a Make: {e}")
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
