@@ -134,13 +134,13 @@ STORAGES = {
     },
 }
 
-resend_api_key = config('RESEND_API_KEY', default='')
-if resend_api_key:
-    EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+sendgrid_api_key = config('SENDGRID_API_KEY', default='')
+if sendgrid_api_key:
+    EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
     ANYMAIL = {
-        "RESEND_API_KEY": resend_api_key,
+        "SENDGRID_API_KEY": sendgrid_api_key,
     }
-    DEFAULT_FROM_EMAIL = 'onboarding@resend.dev'  # Default Resend test sender
+    DEFAULT_FROM_EMAIL = 'desarrolloapp@aura.cl'  # The verified single sender
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'smtp.gmail.com'
